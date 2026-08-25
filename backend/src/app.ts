@@ -1,12 +1,15 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { prisma } from "./config/prisma.js";
 import userRoutes from "./routes/user.routes.js";
+import authRoutes from "./routes/user.routes.js"
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Basic server health check
 app.get("/health", (_req, res) => {
@@ -34,6 +37,11 @@ app.get("/health/db", async (_req, res) => {
   }
 });
 
+
+//Temporary development user route
 app.use("/api/users", userRoutes);
+
+//Authentication routes
+app.use("/api/auth", authRoutes);
 
 export default app;
