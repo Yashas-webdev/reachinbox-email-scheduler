@@ -34,4 +34,6 @@ app.get("/health/db", async (_req, res) => {
   }
 });
 
+app.use("/api/users", userRoutes);
+
 export default app;
