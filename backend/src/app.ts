@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { prisma } from "./config/prisma.js";
+import userRoutes from "./routes/user.routes.js";
 
 const app = express();
 

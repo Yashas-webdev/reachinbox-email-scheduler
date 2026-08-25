@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 
-export const createuser = async(
+export const createUser = async(
     req: Request,
     res: Response
 ) => {
