@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { prisma } from "./config/prisma.js";
 import userRoutes from "./routes/user.routes.js";
-import authRoutes from "./routes/user.routes.js"
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
