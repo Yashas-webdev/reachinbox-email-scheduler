@@ -41,8 +41,11 @@ export const googleLogin = async (
   } catch (error) {
     console.error("Google login error:", error);
 
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+
     return res.status(401).json({
       message: "Google authentication failed",
+      error: errorMessage,
     });
   }
 };
