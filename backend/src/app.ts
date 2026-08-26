@@ -5,6 +5,7 @@ import { prisma } from "./config/prisma.js";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import emailRoutes from "./routes/email.routes.js";
+import senderRoutes from "./routes/sender.routes.js";
 
 const app = express();
 
@@ -52,5 +53,12 @@ app.use("/api/auth", authRoutes);
 
 //email routes
 app.use("/api/emails", emailRoutes);
+
+//Sender routes
+app.use("/api/senders", senderRoutes);
+
+//Schedule routes
+import scheduleRoutes from "./routes/schedule.routes.js";
+app.use("/api/schedules", scheduleRoutes);
 
 export default app;
