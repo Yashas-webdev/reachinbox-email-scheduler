@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import { prisma } from "./config/prisma.js";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import emailRoutes from "./routes/email.routes.js";
 
 const app = express();
 
@@ -48,5 +49,8 @@ app.use("/api/users", userRoutes);
 
 //Authentication routes
 app.use("/api/auth", authRoutes);
+
+//email routes
+app.use("/api/emails", emailRoutes);
 
 export default app;
