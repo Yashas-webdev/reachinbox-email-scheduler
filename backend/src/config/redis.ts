@@ -5,8 +5,11 @@ const redisOptions = {
   maxRetriesPerRequest: null,
 };
 
-const redis = process.env.REDIS_URL
-  ? new Redis(process.env.REDIS_URL, redisOptions)
+// Clean REDIS_URL from any accidental quotes or trailing whitespace
+const rawRedisUrl = process.env.REDIS_URL ? process.env.REDIS_URL.trim().replace(/^["']|["']$/g, "") : null;
+
+const redis = rawRedisUrl
+  ? new Redis(rawRedisUrl, redisOptions)
   : new Redis({
       host: process.env.REDIS_HOST || "localhost",
       port: Number(process.env.REDIS_PORT || 6379),
