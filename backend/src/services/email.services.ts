@@ -1,26 +1,17 @@
 import nodemailer from "nodemailer";
 
-const smtpPort = Number(process.env.ETHEREAL_PORT);
-
-if (!process.env.ETHEREAL_HOST) {
-  throw new Error("ETHEREAL_HOST is not defined");
-}
-
-if (!process.env.ETHEREAL_USER) {
-  throw new Error("ETHEREAL_USER is not defined");
-}
-
-if (!process.env.ETHEREAL_PASSWORD) {
-  throw new Error("ETHEREAL_PASSWORD is not defined");
-}
+const smtpHost = process.env.ETHEREAL_HOST || "smtp.ethereal.email";
+const smtpPort = Number(process.env.ETHEREAL_PORT || 587);
+const smtpUser = process.env.ETHEREAL_USER || "guy13@ethereal.email";
+const smtpPassword = process.env.ETHEREAL_PASSWORD || "wFGnr3gFArvtTxw5pd";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.ETHEREAL_HOST,
+  host: smtpHost,
   port: smtpPort,
   secure: smtpPort === 465,
   auth: {
-    user: process.env.ETHEREAL_USER,
-    pass: process.env.ETHEREAL_PASSWORD,
+    user: smtpUser,
+    pass: smtpPassword,
   },
 });
 
@@ -34,7 +25,7 @@ export const sendEmail = async ({
   body: string;
 }) => {
   const info = await transporter.sendMail({
-    from: process.env.ETHEREAL_USER,
+    from: smtpUser,
     to,
     subject,
     text: body,
