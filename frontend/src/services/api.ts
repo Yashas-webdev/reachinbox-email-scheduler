@@ -1,6 +1,8 @@
 import type { User, Sender, Schedule, SentEmailLog } from "../types";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const rawApiUrl = import.meta.env.VITE_API_URL || "https://reachinbox-backend-ul75.onrender.com";
+const cleanBaseUrl = rawApiUrl.replace(/\/$/, "");
+const API_BASE_URL = cleanBaseUrl.endsWith("/api") ? cleanBaseUrl : `${cleanBaseUrl}/api`;
 
 // Helper function to handle all HTTP fetch requests cleanly
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

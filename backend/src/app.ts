@@ -6,15 +6,28 @@ import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import emailRoutes from "./routes/email.routes.js";
 import senderRoutes from "./routes/sender.routes.js";
+import scheduleRoutes from "./routes/schedule.routes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -44,21 +57,19 @@ app.get("/health/db", async (_req, res) => {
   }
 });
 
-
-//Temporary development user route
-app.use("/api/users", userRoutes);
-
-//Authentication routes
+// Authentication routes
 app.use("/api/auth", authRoutes);
 
-//email routes
+// User routes
+app.use("/api/users", userRoutes);
+
+// Email routes
 app.use("/api/emails", emailRoutes);
 
-//Sender routes
+// Sender routes
 app.use("/api/senders", senderRoutes);
 
-//Schedule routes
-import scheduleRoutes from "./routes/schedule.routes.js";
+// Schedule routes
 app.use("/api/schedules", scheduleRoutes);
 
 export default app;
