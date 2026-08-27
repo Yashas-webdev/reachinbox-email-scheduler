@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { User } from "../types";
 import { LogOut, Plus, Server, Send } from "lucide-react";
 
@@ -15,6 +15,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCompose,
   onOpenSenders,
 }) => {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <header className="bg-white border-b border-[#E8E4DC] sticky top-0 z-30 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -55,15 +57,17 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* User Profile */}
           <div className="flex items-center gap-2.5">
-            {user.avatar ? (
+            {user.avatar && !imgError ? (
               <img
                 src={user.avatar}
                 alt={user.name}
+                referrerPolicy="no-referrer"
+                onError={() => setImgError(true)}
                 className="w-8 h-8 rounded-full border border-[#E8E4DC] object-cover"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#F5F2EC] border border-[#E8E4DC] text-slate-700 flex items-center justify-center font-bold text-xs">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs shadow-2xs">
+                {user.name ? user.name.charAt(0).toUpperCase() : "U"}
               </div>
             )}
 

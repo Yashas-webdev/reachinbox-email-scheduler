@@ -106,9 +106,10 @@ function App() {
     );
   }
 
-  // 5. Main Dashboard Layout
+  // 5. Main Dashboard Layout (Fixed Viewport with Sticky Header/Metrics & Scrollable Email List)
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-slate-900 font-sans pb-16">
+    <div className="h-screen flex flex-col bg-[#FAF8F5] text-slate-900 font-sans overflow-hidden">
+      {/* Pinned Top Navigation Header */}
       <Header
         user={user}
         onLogout={handleLogout}
@@ -116,11 +117,15 @@ function App() {
         onOpenSenders={() => setIsSendersOpen(true)}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <MetricsCards schedules={schedules} sentLogs={sentLogs} />
+      {/* Main Dashboard Container */}
+      <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 flex-1 flex flex-col min-h-0">
+        {/* Sticky Metrics Cards Header */}
+        <div className="flex-shrink-0">
+          <MetricsCards schedules={schedules} sentLogs={sentLogs} />
+        </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center justify-between border-b border-slate-200 mb-6 pb-2">
+        {/* Sticky Tab Navigation Bar */}
+        <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 my-4 pb-2 bg-[#FAF8F5]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab("schedules")}
@@ -156,21 +161,23 @@ function App() {
           </button>
         </div>
 
-        {/* Tab Views */}
-        {activeTab === "schedules" ? (
-          <ScheduledEmailsTable
-            schedules={schedules}
-            loading={loadingData}
-            onRefresh={() => loadDashboardData(true)}
-            onOpenCompose={() => setIsComposeOpen(true)}
-          />
-        ) : (
-          <SentEmailsTable
-            sentLogs={sentLogs}
-            loading={loadingData}
-            onRefresh={() => loadDashboardData(true)}
-          />
-        )}
+        {/* Independently Scrollable Email List Container */}
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+          {activeTab === "schedules" ? (
+            <ScheduledEmailsTable
+              schedules={schedules}
+              loading={loadingData}
+              onRefresh={() => loadDashboardData(true)}
+              onOpenCompose={() => setIsComposeOpen(true)}
+            />
+          ) : (
+            <SentEmailsTable
+              sentLogs={sentLogs}
+              loading={loadingData}
+              onRefresh={() => loadDashboardData(true)}
+            />
+          )}
+        </div>
       </main>
 
       {/* Modals */}

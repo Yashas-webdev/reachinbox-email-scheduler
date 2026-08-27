@@ -47,7 +47,7 @@ We built a full-stack, decoupled system that allows marketers and sales teams to
 
 2. **Multiple SMTP Senders Management**:
    - Support for adding and managing multiple SMTP accounts (`POST /api/senders`, `GET /api/senders`).
-   - Built-in **⚡ Auto-fill Demo Ethereal** button that automatically provisions real Ethereal SMTP test mailboxes on-the-fly for quick code reviews.
+   - Easily configure custom SMTP accounts (Ethereal, Gmail, Mailtrap, etc.) with custom credentials.
 
 3. **Campaign Composition & CSV Lead Parser**:
    - Modal interface to set campaign Subject, Body, Start Time, Inter-email Delay (sec), and Hourly Rate Limit.
@@ -115,7 +115,7 @@ We built a full-stack, decoupled system that allows marketers and sales teams to
 - Backend verifies the user, saves them in PostgreSQL, generates a JWT token, and returns it inside an `HttpOnly` cookie.
 
 ### Step 2: Configure Sender Account
-- User opens **SMTP Senders** and clicks **⚡ Auto-fill Demo Ethereal**.
+- User opens **SMTP Senders** and adds their SMTP account credentials (e.g. Ethereal, Gmail, or custom SMTP).
 - Credentials are saved in PostgreSQL under the user's account ID.
 
 ### Step 3: Schedule a Campaign
@@ -153,7 +153,7 @@ We built a full-stack, decoupled system that allows marketers and sales teams to
 ### Backend (`backend/.env`)
 ```env
 PORT=5000
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/email_scheduler?schema=public"
+DATABASE_URL="postgresql://reachinbox:reachinbox_password@localhost:5432/reachinbox"
 REDIS_HOST="localhost"
 REDIS_PORT=6379
 JWT_SECRET="reachinbox_super_secret_jwt_key_2026"
@@ -175,23 +175,16 @@ VITE_GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
 docker compose up -d
 ```
 
-### 2. Start Backend API Server
+### 2. Start Backend API Server & BullMQ Worker
 ```bash
 cd backend
 npm install
-npx prisma db push
 npm run dev
 ```
+*(The backend server automatically initializes the Prisma database client and starts the BullMQ worker process).*
 
-### 3. Start Worker Engine
-In a new terminal window:
-```bash
-cd backend
-npm run worker
-```
-
-### 4. Start Frontend React Dashboard
-In a third terminal window:
+### 3. Start Frontend React Dashboard
+In a second terminal window:
 ```bash
 cd frontend
 npm install

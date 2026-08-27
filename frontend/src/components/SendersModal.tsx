@@ -63,15 +63,6 @@ export const SendersModal: React.FC<SendersModalProps> = ({
     }
   };
 
-  const autofillEthereal = () => {
-    setName("ReachInbox Ethereal Account");
-    setEmail("ethereal_test@reachinbox.ai");
-    setSmtpHost("smtp.ethereal.email");
-    setSmtpPort(587);
-    setSmtpUser("demo_ethereal_user");
-    setSmtpPassword("demo_password");
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden my-8 text-slate-900">
@@ -152,13 +143,6 @@ export const SendersModal: React.FC<SendersModalProps> = ({
                 <h4 className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
                   New SMTP Sender Configuration
                 </h4>
-                <button
-                  type="button"
-                  onClick={autofillEthereal}
-                  className="text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-200 transition-colors"
-                >
-                  ⚡ Auto-fill Demo Ethereal
-                </button>
               </div>
 
               {errorMsg && (

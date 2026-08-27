@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Worker } from "bullmq";
+import { Worker, DelayedError } from "bullmq";
 import nodemailer from "nodemailer";
 import redis from "../config/redis.js";
 import { prisma } from "../config/prisma.js";
@@ -70,9 +70,15 @@ const worker = new Worker(
         nextHour.setUTCHours(nextHour.getUTCHours() + 1, 0, 0, 0);
         const delayMs = Math.max(1000, nextHour.getTime() - now.getTime());
 
+        // Update PostgreSQL scheduledAt so UI reflects deferred 2:00 PM timestamp
+        await prisma.scheduledEmail.update({
+          where: { id: emailId },
+          data: { scheduledAt: nextHour },
+        });
+
         console.log(`[Worker] Rescheduling job ${job.id} to next hour in ${Math.round(delayMs / 1000)}s.`);
         await job.moveToDelayed(Date.now() + delayMs, job.token);
-        return { rescheduled: true, nextHourDelayMs: delayMs };
+        throw new DelayedError();
       }
     }
 

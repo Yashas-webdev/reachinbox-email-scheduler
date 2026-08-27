@@ -94,6 +94,7 @@ export const createSchedule = async (
           scheduleId: schedule.id,
         },
         {
+          jobId: email.id,
           delay: delayMs,
         }
       );
@@ -202,3 +203,76 @@ export const getSentEmails = async (userId: string) => {
     },
   });
 };
+
+// Function 4: Recovery mechanism to re-enqueue pending or missed scheduled emails into BullMQ
+export const recoverPendingSchedules = async () => {
+  console.log("[Recovery] Checking for un-enqueued or pending scheduled emails...");
+
+  const pendingEmails = await prisma.scheduledEmail.findMany({
+    where: {
+      status: { in: ["SCHEDULED", "PROCESSING"] },
+    },
+    include: {
+      schedule: true,
+    },
+  });
+
+  if (pendingEmails.length === 0) {
+    console.log("[Recovery] No pending emails found needing recovery.");
+    return;
+  }
+
+  console.log(`[Recovery] Found ${pendingEmails.length} pending email(s). Enqueuing into BullMQ queue...`);
+
+  for (const email of pendingEmails) {
+    const delayMs = Math.max(0, email.scheduledAt.getTime() - Date.now());
+
+    // Check if job is already active/delayed in Redis
+    const existingJob = await emailQueue.getJob(email.id);
+    if (existingJob) {
+      const state = await existingJob.getState();
+      if (state === "delayed" || state === "waiting" || state === "active") {
+        // Sync DB scheduledAt with actual Redis execution time if delayed
+        if (state === "delayed") {
+          const delayVal = existingJob.opts.delay || 0;
+          const targetMs = existingJob.timestamp + delayVal;
+          if (targetMs > Date.now()) {
+            const targetDate = new Date(targetMs);
+            if (Math.abs(email.scheduledAt.getTime() - targetDate.getTime()) > 5000) {
+              await prisma.scheduledEmail.update({
+                where: { id: email.id },
+                data: { scheduledAt: targetDate },
+              });
+              console.log(`[Recovery] Synced DB scheduledAt for ${email.recipient} to Redis target time: ${targetDate.toLocaleTimeString()}`);
+            }
+          }
+        }
+        console.log(`[Recovery] Job ${email.id} to ${email.recipient} is already active in Redis queue (state: '${state}'). Preserving timer.`);
+        continue;
+      }
+      // If job was completed/failed/stale in Redis but pending in DB, remove stale job
+      await existingJob.remove();
+    }
+
+    const job = await emailQueue.add(
+      "send-email",
+      {
+        emailId: email.id,
+        scheduleId: email.scheduleId,
+      },
+      {
+        jobId: email.id,
+        delay: delayMs,
+      }
+    );
+
+    if (job.id) {
+      await prisma.scheduledEmail.update({
+        where: { id: email.id },
+        data: { bullJobId: job.id },
+      });
+      console.log(`[Recovery] Enqueued email ${email.id} to ${email.recipient} (BullJobId: ${job.id}, Delay: ${Math.round(delayMs / 1000)}s)`);
+    }
+  }
+};
+

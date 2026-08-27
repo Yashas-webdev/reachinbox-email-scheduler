@@ -67,35 +67,37 @@ export const ScheduledEmailsTable: React.FC<ScheduledEmailsTableProps> = ({
   };
 
   return (
-    <>
-      <div className="bg-white border border-[#E8E4DC] rounded-xl overflow-hidden shadow-xs">
-        {/* Table Header */}
-        <div className="p-4 sm:p-5 border-b border-[#E8E4DC] flex items-center justify-between bg-[#F7F5F0]">
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-600" />
-              Scheduled Campaigns
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Click any recipient email to view full subject & body text</p>
-          </div>
-
-          <button
-            onClick={onRefresh}
-            disabled={loading}
-            className="p-2 text-slate-500 hover:text-slate-900 bg-white hover:bg-slate-100 border border-[#E8E4DC] rounded-lg transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-blue-600" : ""}`} />
-          </button>
+    <div className="h-full flex flex-col min-h-0">
+      {/* Sticky Section Header (Pinned at top of campaigns section) */}
+      <div className="flex-shrink-0 bg-white border border-[#E8E4DC] rounded-xl p-4 sm:p-5 flex items-center justify-between shadow-xs mb-3">
+        <div>
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-600" />
+            Scheduled Campaigns ({schedules.length})
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Click any campaign card to expand recipients and inspect full email details
+          </p>
         </div>
 
-        {/* Content */}
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="p-2 text-slate-500 hover:text-slate-900 bg-[#F7F5F0] hover:bg-[#EBE7DF] border border-[#E8E4DC] rounded-lg transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-blue-600" : ""}`} />
+        </button>
+      </div>
+
+      {/* Scrollable Campaign Cards List */}
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-3">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">
+          <div className="bg-white border border-[#E8E4DC] rounded-xl p-12 text-center text-slate-500 shadow-xs">
             <RefreshCw className="w-7 h-7 animate-spin mx-auto text-blue-600 mb-3" />
             <p className="text-sm font-medium">Loading scheduled campaigns...</p>
           </div>
         ) : schedules.length === 0 ? (
-          <div className="p-12 text-center">
+          <div className="bg-white border border-[#E8E4DC] rounded-xl p-12 text-center shadow-xs">
             <div className="w-12 h-12 rounded-full bg-[#F5F2EC] text-slate-400 flex items-center justify-center mx-auto mb-3">
               <Mail className="w-6 h-6" />
             </div>
@@ -112,101 +114,102 @@ export const ScheduledEmailsTable: React.FC<ScheduledEmailsTableProps> = ({
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-[#E8E4DC]">
-            {schedules.map((schedule) => {
-              const isExpanded = expandedId === schedule.id;
-              const recipientCount = schedule.emails?.length || 0;
+          schedules.map((schedule) => {
+            const isExpanded = expandedId === schedule.id;
+            const recipientCount = schedule.emails?.length || 0;
 
-              return (
-                <div key={schedule.id} className="transition-colors hover:bg-[#FAF8F5]">
-                  <div
-                    onClick={() => toggleExpand(schedule.id)}
-                    className="p-4 sm:px-6 flex items-center justify-between cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-blue-600" /> : <ChevronRight className="w-4 h-4" />}
-                      </button>
+            return (
+              <div
+                key={schedule.id}
+                className="bg-white border border-[#E8E4DC] hover:border-blue-300 rounded-xl overflow-hidden shadow-xs transition-all"
+              >
+                <div
+                  onClick={() => toggleExpand(schedule.id)}
+                  className="p-4 sm:px-6 flex items-center justify-between cursor-pointer hover:bg-[#FAF8F5]"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <button className="text-slate-400 hover:text-slate-600 p-0.5">
+                      {isExpanded ? <ChevronDown className="w-4 h-4 text-blue-600" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
 
-                      <div className="min-w-0">
-                        <h4 className="text-sm font-bold text-slate-900 truncate">{schedule.subject}</h4>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          From: <span className="text-slate-700 font-medium">{schedule.sender?.name || "Sender"}</span> ({schedule.sender?.email})
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
-                      <div className="hidden sm:block text-right">
-                        <p className="text-xs font-medium text-slate-700">
-                          {new Date(schedule.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {new Date(schedule.startTime).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-xs font-bold text-blue-600">
-                          {recipientCount} <span className="text-slate-500 font-normal">recipients</span>
-                        </p>
-                      </div>
-
-                      <div>{getStatusBadge(schedule.status)}</div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-slate-900 truncate">{schedule.subject}</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        From: <span className="text-slate-700 font-medium">{schedule.sender?.name || "Sender"}</span> ({schedule.sender?.email})
+                      </p>
                     </div>
                   </div>
 
-                  {isExpanded && (
-                    <div className="bg-[#FAF8F5] border-t border-b border-[#E8E4DC] p-4 sm:px-8 space-y-3">
-                      {/* Campaign Settings Header */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-[#E8E4DC]">
-                        <span className="font-semibold text-slate-700 uppercase tracking-wider">
-                          Click recipient email to view details
-                        </span>
-                        <div className="flex items-center gap-4">
-                          <span>Delay: <strong className="text-slate-800">{schedule.delayBetweenEmails}s</strong></span>
-                          <span>Hourly Limit: <strong className="text-slate-800">{schedule.hourlyLimit > 0 ? schedule.hourlyLimit : "Unlimited"}</strong></span>
-                        </div>
-                      </div>
+                  <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
+                    <div className="hidden sm:block text-right">
+                      <p className="text-xs font-medium text-slate-700">
+                        {new Date(schedule.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {new Date(schedule.startTime).toLocaleDateString()}
+                      </p>
+                    </div>
 
-                      {/* Recipient List Breakdown */}
-                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        {schedule.emails?.map((email) => (
-                          <div
-                            key={email.id}
-                            onClick={() => setSelectedRecipient({ email, schedule })}
-                            className="flex items-center justify-between p-2.5 bg-white hover:bg-[#F5F2EC] border border-[#E8E4DC] rounded-lg text-xs cursor-pointer transition-colors group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="p-1.5 bg-[#F5F2EC] text-slate-500 group-hover:text-blue-600 rounded">
-                                <Mail className="w-3.5 h-3.5" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
-                                  <span>{email.recipient}</span>
-                                  <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </p>
-                                <p className="text-[11px] text-slate-400 truncate max-w-sm">
-                                  Subject: {schedule.subject}
-                                </p>
-                              </div>
-                            </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-blue-600">
+                        {recipientCount} <span className="text-slate-500 font-normal">recipients</span>
+                      </p>
+                    </div>
 
-                            <div className="flex items-center gap-4">
-                              <span className="text-slate-400 hidden sm:inline">
-                                Scheduled: {new Date(email.scheduledAt).toLocaleTimeString()}
-                              </span>
-                              {getStatusBadge(email.status)}
-                            </div>
-                          </div>
-                        ))}
+                    <div>{getStatusBadge(schedule.status)}</div>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="bg-[#FAF8F5] border-t border-[#E8E4DC] p-4 sm:px-6 space-y-3">
+                    {/* Campaign Settings Header */}
+                    <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-[#E8E4DC]">
+                      <span className="font-semibold text-slate-700 uppercase tracking-wider">
+                        Click recipient email to view details
+                      </span>
+                      <div className="flex items-center gap-4">
+                        <span>Delay: <strong className="text-slate-800">{schedule.delayBetweenEmails}s</strong></span>
+                        <span>Hourly Limit: <strong className="text-slate-800">{schedule.hourlyLimit > 0 ? schedule.hourlyLimit : "Unlimited"}</strong></span>
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+
+                    {/* Recipient List Breakdown */}
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {schedule.emails?.map((email) => (
+                        <div
+                          key={email.id}
+                          onClick={() => setSelectedRecipient({ email, schedule })}
+                          className="flex items-center justify-between p-3 bg-white hover:bg-[#F5F2EC] border border-[#E8E4DC] hover:border-blue-300 rounded-lg text-xs cursor-pointer transition-colors group shadow-2xs"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-[#F5F2EC] text-slate-500 group-hover:text-blue-600 rounded">
+                              <Mail className="w-3.5 h-3.5" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+                                <span>{email.recipient}</span>
+                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </p>
+                              <p className="text-[11px] text-slate-400 truncate max-w-sm">
+                                Subject: {schedule.subject}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <span className="text-slate-400 hidden sm:inline">
+                              Scheduled: {new Date(email.scheduledAt).toLocaleTimeString()}
+                            </span>
+                            {getStatusBadge(email.status)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
 
@@ -224,6 +227,6 @@ export const ScheduledEmailsTable: React.FC<ScheduledEmailsTableProps> = ({
           timestamp={new Date(selectedRecipient.email.scheduledAt).toLocaleString()}
         />
       )}
-    </>
+    </div>
   );
 };
